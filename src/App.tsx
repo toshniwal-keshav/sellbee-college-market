@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Marketplace from "./pages/Marketplace";
+import Auction from "./pages/Auction";
 import AddListing from "./pages/AddListing";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/" element={<Home />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/auction" element={<Auction />} />
           <Route path="/add-listing" element={<AddListing />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
