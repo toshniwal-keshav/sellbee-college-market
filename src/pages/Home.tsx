@@ -11,8 +11,11 @@ const Home = () => {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-4xl mx-auto">
-          <div className="text-6xl mb-6 animate-float">🐝</div>
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-honey via-honey-light to-honey bg-clip-text text-transparent">
+          <div className="relative inline-block">
+            <div className="text-8xl mb-6 animate-float drop-shadow-2xl">🐝</div>
+            <div className="absolute inset-0 blur-3xl bg-honey opacity-30 animate-pulse-glow"></div>
+          </div>
+          <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-honey via-honey-light to-honey bg-clip-text text-transparent drop-shadow-lg animate-fade-in">
             Your Campus Marketplace
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">

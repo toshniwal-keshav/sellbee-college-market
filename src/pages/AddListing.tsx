@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Upload } from "lucide-react";
 
 const AddListing = () => {
   const navigate = useNavigate();
@@ -19,9 +20,26 @@ const AddListing = () => {
     whatsapp: "",
     telegram: ""
   });
+  const [files, setFiles] = useState<File[]>([]);
+  
+  // Mock: Check if user has reached listing limit
+  const userListingCount = 3; // This would come from backend
+  const MAX_LISTINGS = 5;
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFiles(Array.from(e.target.files));
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (userListingCount >= MAX_LISTINGS) {
+      toast.error(`You've reached the maximum limit of ${MAX_LISTINGS} listings per account.`);
+      return;
+    }
+    
     // TODO: Connect to backend
     toast.success("Listing posted successfully!");
     navigate("/marketplace");
@@ -33,9 +51,12 @@ const AddListing = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-honey to-honey-light bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-honey to-honey-light bg-clip-text text-transparent">
             Post an Ad
           </h1>
+          <p className="text-sm text-muted-foreground mb-8">
+            You have {MAX_LISTINGS - userListingCount} listing(s) remaining
+          </p>
 
           <Card>
             <CardHeader>
@@ -118,6 +139,31 @@ const AddListing = () => {
                     value={formData.telegram}
                     onChange={(e) => setFormData({...formData, telegram: e.target.value})}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="files">Upload Images/Videos (Optional)</Label>
+                  <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-honey transition-colors">
+                    <Input
+                      id="files"
+                      type="file"
+                      multiple
+                      accept="image/*,video/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <label htmlFor="files" className="cursor-pointer">
+                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        Click to upload multimedia files
+                      </p>
+                      {files.length > 0 && (
+                        <p className="text-sm text-honey mt-2">
+                          {files.length} file(s) selected
+                        </p>
+                      )}
+                    </label>
+                  </div>
                 </div>
 
                 <div className="flex gap-4">

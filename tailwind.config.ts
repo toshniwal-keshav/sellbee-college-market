@@ -56,6 +56,11 @@ export default {
           dark: "hsl(var(--honey-dark))",
           light: "hsl(var(--honey-light))",
         },
+        pastel: {
+          pink: "hsl(var(--pastel-pink))",
+          lavender: "hsl(var(--pastel-lavender))",
+          mint: "hsl(var(--pastel-mint))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
