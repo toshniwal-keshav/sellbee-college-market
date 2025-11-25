@@ -12,7 +12,7 @@ const Home = () => {
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-4xl mx-auto">
           <div className="relative inline-block">
-            <div className="text-8xl mb-6 animate-float drop-shadow-2xl">🐝</div>
+            <div className="text-5xl mb-6 animate-float drop-shadow-2xl">🐝</div>
             <div className="absolute inset-0 blur-3xl bg-honey opacity-30 animate-pulse-glow"></div>
           </div>
           <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-honey via-honey-light to-honey bg-clip-text text-transparent drop-shadow-lg animate-fade-in">
@@ -28,6 +28,34 @@ const Home = () => {
             <Button size="lg" variant="outline" asChild className="text-lg px-8">
               <Link to="/auth">Get Started</Link>
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Skills Offered Section */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-8 bg-gradient-to-r from-honey to-honey-light bg-clip-text text-transparent">
+            Skills & Services Offered
+          </h2>
+          <div className="bg-card border border-border rounded-3xl p-8 shadow-lg">
+            <p className="text-center text-muted-foreground mb-6">
+              Connect with talented students offering various skills and services
+            </p>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="p-4 bg-background rounded-xl border border-border hover:border-honey transition-colors">
+                <h3 className="font-semibold mb-2 text-honey">Tutoring</h3>
+                <p className="text-sm text-muted-foreground">Academic support across subjects</p>
+              </div>
+              <div className="p-4 bg-background rounded-xl border border-border hover:border-honey transition-colors">
+                <h3 className="font-semibold mb-2 text-honey">Design & Creative</h3>
+                <p className="text-sm text-muted-foreground">Graphics, video editing, photography</p>
+              </div>
+              <div className="p-4 bg-background rounded-xl border border-border hover:border-honey transition-colors">
+                <h3 className="font-semibold mb-2 text-honey">Tech & Development</h3>
+                <p className="text-sm text-muted-foreground">Web development, app creation</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
