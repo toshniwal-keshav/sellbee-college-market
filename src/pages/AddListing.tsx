@@ -114,9 +114,15 @@ const AddListing = () => {
                         <SelectItem value="Electronics">Electronics</SelectItem>
                         <SelectItem value="Accessories">Accessories</SelectItem>
                         <SelectItem value="Furniture">Furniture</SelectItem>
+                        <SelectItem value="Tutoring">Tutoring (Service)</SelectItem>
+                        <SelectItem value="Design">Design & Creative (Service)</SelectItem>
+                        <SelectItem value="Development">Tech & Development (Service)</SelectItem>
                         <SelectItem value="Other">Other</SelectItem>
                       </SelectContent>
                     </Select>
+                    {(formData.category === "Tutoring" || formData.category === "Design" || formData.category === "Development") && (
+                      <p className="text-sm text-muted-foreground">Note: Services cannot be listed for auction</p>
+                    )}
                   </div>
                 </div>
 
