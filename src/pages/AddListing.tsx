@@ -51,7 +51,7 @@ const AddListing = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-honey to-honey-light bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-honey to-honey-light bg-clip-text text-Black">
             Post an Ad
           </h1>
           <p className="text-sm text-muted-foreground mb-8">

@@ -17,11 +17,13 @@ const Marketplace = () => {
     <div className="min-h-screen bg-background font-fredoka">
       <Navbar isAuthenticated />
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-honey to-honey-light bg-clip-text text-transparent">
-            Marketplace
-          </h1>
+      <div className="container mx-auto px-4 py-8"> <div className="mb-8">
+        <h1 className="text-4xl font-bold mb-4 text-black">
+  Marketplace
+</h1>
+
+
+
           
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">

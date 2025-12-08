@@ -104,9 +104,10 @@ const Auction = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-honey to-honey-light bg-clip-text text-transparent">
-            Live Auctions
-          </h1>
+          <h1 className="text-4xl font-bold mb-4 text-black">
+Live Auction
+</h1>
+
           <p className="text-muted-foreground mb-6">
             Unsold items automatically enter auction at 50% base price after 30 days
           </p>
