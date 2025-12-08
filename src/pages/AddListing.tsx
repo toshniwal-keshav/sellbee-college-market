@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -8,42 +8,100 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Upload } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+const MAX_LISTINGS = 5;
 
 const AddListing = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [userListingCount, setUserListingCount] = useState(0);
+  const [categories, setCategories] = useState<{ id: string; name: string; type: string }[]>([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     price: "",
-    category: "",
-    whatsapp: "",
-    telegram: ""
+    category_id: "",
+    condition: "good",
   });
-  const [files, setFiles] = useState<File[]>([]);
-  
-  // Mock: Check if user has reached listing limit
-  const userListingCount = 3; // This would come from backend
-  const MAX_LISTINGS = 5;
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFiles(Array.from(e.target.files));
-    }
-  };
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
 
-  const handleSubmit = (e: React.FormEvent) => {
+      // Fetch user's listing count
+      const { count } = await supabase
+        .from("listings")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", session.user.id);
+      
+      setUserListingCount(count || 0);
+    };
+
+    const fetchCategories = async () => {
+      const { data } = await supabase
+        .from("categories")
+        .select("*")
+        .order("type")
+        .order("name");
+      
+      if (data) setCategories(data);
+    };
+
+    checkAuth();
+    fetchCategories();
+  }, [navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (userListingCount >= MAX_LISTINGS) {
       toast.error(`You've reached the maximum limit of ${MAX_LISTINGS} listings per account.`);
       return;
     }
-    
-    // TODO: Connect to backend
-    toast.success("Listing posted successfully!");
-    navigate("/marketplace");
+
+    setLoading(true);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please login to create a listing");
+        navigate("/auth");
+        return;
+      }
+
+      const selectedCategory = categories.find(c => c.id === formData.category_id);
+      const listingType = selectedCategory?.type || "product";
+
+      const { error } = await supabase.from("listings").insert({
+        user_id: session.user.id,
+        title: formData.title,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        category_id: formData.category_id || null,
+        condition: formData.condition,
+        listing_type: listingType,
+      });
+
+      if (error) throw error;
+
+      toast.success("Listing posted successfully!");
+      navigate("/marketplace");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create listing");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const productCategories = categories.filter(c => c.type === "product");
+  const serviceCategories = categories.filter(c => c.type === "service");
+  const selectedCategory = categories.find(c => c.id === formData.category_id);
 
   return (
     <div className="min-h-screen bg-background font-fredoka">
@@ -72,6 +130,7 @@ const AddListing = () => {
                     value={formData.title}
                     onChange={(e) => setFormData({...formData, title: e.target.value})}
                     required
+                    disabled={loading}
                   />
                 </div>
 
@@ -84,6 +143,7 @@ const AddListing = () => {
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
                     rows={4}
                     required
+                    disabled={loading}
                   />
                 </div>
 
@@ -97,89 +157,82 @@ const AddListing = () => {
                       value={formData.price}
                       onChange={(e) => setFormData({...formData, price: e.target.value})}
                       required
+                      disabled={loading}
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="category">Category</Label>
                     <Select 
-                      value={formData.category}
-                      onValueChange={(value) => setFormData({...formData, category: value})}
+                      value={formData.category_id}
+                      onValueChange={(value) => setFormData({...formData, category_id: value})}
+                      disabled={loading}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Books">Books</SelectItem>
-                        <SelectItem value="Electronics">Electronics</SelectItem>
-                        <SelectItem value="Accessories">Accessories</SelectItem>
-                        <SelectItem value="Furniture">Furniture</SelectItem>
-                        <SelectItem value="Tutoring">Tutoring (Service)</SelectItem>
-                        <SelectItem value="Design">Design & Creative (Service)</SelectItem>
-                        <SelectItem value="Development">Tech & Development (Service)</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
+                        {productCategories.length > 0 && (
+                          <>
+                            <SelectItem value="header-products" disabled className="font-semibold text-muted-foreground">
+                              Products
+                            </SelectItem>
+                            {productCategories.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.id}>
+                                {cat.name}
+                              </SelectItem>
+                            ))}
+                          </>
+                        )}
+                        {serviceCategories.length > 0 && (
+                          <>
+                            <SelectItem value="header-services" disabled className="font-semibold text-muted-foreground mt-2">
+                              Services
+                            </SelectItem>
+                            {serviceCategories.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.id}>
+                                {cat.name}
+                              </SelectItem>
+                            ))}
+                          </>
+                        )}
                       </SelectContent>
                     </Select>
-                    {(formData.category === "Tutoring" || formData.category === "Design" || formData.category === "Development") && (
+                    {selectedCategory?.type === "service" && (
                       <p className="text-sm text-muted-foreground">Note: Services cannot be listed for auction</p>
                     )}
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="whatsapp">WhatsApp Number</Label>
-                  <Input
-                    id="whatsapp"
-                    placeholder="1234567890"
-                    value={formData.whatsapp}
-                    onChange={(e) => setFormData({...formData, whatsapp: e.target.value})}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="telegram">Telegram Username (Optional)</Label>
-                  <Input
-                    id="telegram"
-                    placeholder="@username"
-                    value={formData.telegram}
-                    onChange={(e) => setFormData({...formData, telegram: e.target.value})}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="files">Upload Images/Videos (Optional)</Label>
-                  <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-honey transition-colors">
-                    <Input
-                      id="files"
-                      type="file"
-                      multiple
-                      accept="image/*,video/*"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                    <label htmlFor="files" className="cursor-pointer">
-                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">
-                        Click to upload multimedia files
-                      </p>
-                      {files.length > 0 && (
-                        <p className="text-sm text-honey mt-2">
-                          {files.length} file(s) selected
-                        </p>
-                      )}
-                    </label>
-                  </div>
+                  <Label htmlFor="condition">Condition</Label>
+                  <Select 
+                    value={formData.condition}
+                    onValueChange={(value) => setFormData({...formData, condition: value})}
+                    disabled={loading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select condition" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="like-new">Like New</SelectItem>
+                      <SelectItem value="good">Good</SelectItem>
+                      <SelectItem value="fair">Fair</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="flex gap-4">
-                  <Button type="submit" className="flex-1">
+                  <Button type="submit" className="flex-1" disabled={loading}>
+                    {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                     Post Listing
                   </Button>
                   <Button 
                     type="button" 
                     variant="outline" 
                     onClick={() => navigate("/marketplace")}
+                    disabled={loading}
                   >
                     Cancel
                   </Button>
