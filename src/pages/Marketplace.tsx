@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, SlidersHorizontal, Loader2 } from "lucide-react";
+import { Search, SlidersHorizontal, Loader2, Phone, Mail, MessageCircle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -19,7 +19,15 @@ interface Listing {
   images: string[] | null;
   created_at: string;
   category_id: string | null;
+  status: string | null;
+  user_id: string;
   categories?: { name: string; type: string } | null;
+  profiles?: {
+    full_name: string | null;
+    email: string | null;
+    phone: string | null;
+    whatsapp: string | null;
+  } | null;
 }
 
 interface Category {
@@ -54,15 +62,37 @@ const Marketplace = () => {
 
   const fetchListings = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    
+    // Fetch listings
+    const { data: listingsData, error } = await supabase
       .from("listings")
       .select(`
         *,
         categories (name, type)
       `)
+      .neq("status", "sold")
       .order("created_at", { ascending: false });
 
-    if (data) setListings(data);
+    if (error || !listingsData) {
+      setLoading(false);
+      return;
+    }
+
+    // Fetch profiles for all listings
+    const userIds = [...new Set(listingsData.map(l => l.user_id))];
+    const { data: profilesData } = await supabase
+      .from("profiles")
+      .select("user_id, full_name, email, phone, whatsapp")
+      .in("user_id", userIds);
+
+    const profilesMap = new Map(profilesData?.map(p => [p.user_id, p]) || []);
+
+    const listingsWithProfiles = listingsData.map(listing => ({
+      ...listing,
+      profiles: profilesMap.get(listing.user_id) || null
+    }));
+
+    setListings(listingsWithProfiles);
     setLoading(false);
   };
 
@@ -111,17 +141,18 @@ const Marketplace = () => {
     });
   };
 
+  const getWhatsAppLink = (phone: string) => {
+    const cleanPhone = phone.replace(/\D/g, "");
+    return `https://wa.me/${cleanPhone}`;
+  };
+
   return (
     <div className="min-h-screen bg-background font-fredoka">
       <Navbar isAuthenticated />
 
-      <div className="container mx-auto px-4 py-8"> <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4 text-black">
-  Marketplace
-</h1>
-
-
-
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-4 text-black">Marketplace</h1>
           
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
@@ -198,45 +229,86 @@ const Marketplace = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredListings.map((listing) => (
-              <Card key={listing.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <CardHeader className="p-0">
-                  <div className="aspect-square bg-muted flex items-center justify-center">
-                    {listing.images && listing.images[0] ? (
-                      <img
-                        src={listing.images[0]}
-                        alt={listing.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="text-6xl">📦</div>
+              <Link key={listing.id} to={`/listing/${listing.id}`}>
+                <Card className="overflow-hidden hover:shadow-lg transition-shadow hover:border-honey h-full">
+                  <CardHeader className="p-0">
+                    <div className="aspect-square bg-muted flex items-center justify-center">
+                      {listing.images && listing.images[0] ? (
+                        <img
+                          src={listing.images[0]}
+                          alt={listing.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="text-6xl">📦</div>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3 className="font-semibold line-clamp-1">{listing.title}</h3>
+                      <Badge variant="secondary" className="shrink-0">
+                        {listing.categories?.name || listing.listing_type}
+                      </Badge>
+                    </div>
+                    <p className="text-2xl font-bold text-honey mb-2">
+                      {formatPrice(listing.price)}
+                    </p>
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                      {listing.description}
+                    </p>
+                    
+                    {/* Seller Contact Info */}
+                    <div className="text-xs space-y-1 border-t pt-2">
+                      <p className="font-medium text-sm">
+                        {listing.profiles?.full_name || "Anonymous"}
+                      </p>
+                      {listing.profiles?.email && (
+                        <a
+                          href={`mailto:${listing.profiles.email}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center gap-1 text-honey hover:underline"
+                        >
+                          <Mail className="h-3 w-3" />
+                          {listing.profiles.email}
+                        </a>
+                      )}
+                      {listing.profiles?.phone && (
+                        <a
+                          href={`tel:${listing.profiles.phone}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center gap-1 text-honey hover:underline"
+                        >
+                          <Phone className="h-3 w-3" />
+                          {listing.profiles.phone}
+                        </a>
+                      )}
+                      {listing.profiles?.whatsapp && (
+                        <a
+                          href={getWhatsAppLink(listing.profiles.whatsapp)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center gap-1 text-green-600 hover:underline"
+                        >
+                          <MessageCircle className="h-3 w-3" />
+                          WhatsApp
+                        </a>
+                      )}
+                    </div>
+                  </CardContent>
+                  <CardFooter className="p-4 pt-0 flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">
+                      {formatDate(listing.created_at)}
+                    </span>
+                    {listing.condition && (
+                      <Badge variant="outline" className="text-xs capitalize">
+                        {listing.condition.replace("-", " ")}
+                      </Badge>
                     )}
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-semibold line-clamp-1">{listing.title}</h3>
-                    <Badge variant="secondary" className="shrink-0">
-                      {listing.categories?.name || listing.listing_type}
-                    </Badge>
-                  </div>
-                  <p className="text-2xl font-bold text-honey mb-2">
-                    {formatPrice(listing.price)}
-                  </p>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {listing.description}
-                  </p>
-                </CardContent>
-                <CardFooter className="p-4 pt-0 flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">
-                    {formatDate(listing.created_at)}
-                  </span>
-                  {listing.condition && (
-                    <Badge variant="outline" className="text-xs capitalize">
-                      {listing.condition.replace("-", " ")}
-                    </Badge>
-                  )}
-                </CardFooter>
-              </Card>
+                  </CardFooter>
+                </Card>
+              </Link>
             ))}
           </div>
         )}

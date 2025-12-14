@@ -79,6 +79,7 @@ export type Database = {
           is_auction: boolean | null
           listing_type: string
           price: number
+          status: string | null
           title: string
           updated_at: string
           user_id: string
@@ -94,6 +95,7 @@ export type Database = {
           is_auction?: boolean | null
           listing_type: string
           price: number
+          status?: string | null
           title: string
           updated_at?: string
           user_id: string
@@ -109,6 +111,7 @@ export type Database = {
           is_auction?: boolean | null
           listing_type?: string
           price?: number
+          status?: string | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -128,31 +131,40 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          email: string | null
           full_name: string | null
           id: string
+          phone: string | null
           updated_at: string
           user_id: string
           username: string | null
+          whatsapp: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
+          phone?: string | null
           updated_at?: string
           user_id: string
           username?: string | null
+          whatsapp?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
+          phone?: string | null
           updated_at?: string
           user_id?: string
           username?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }

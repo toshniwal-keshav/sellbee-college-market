@@ -9,6 +9,7 @@ import Marketplace from "./pages/Marketplace";
 import Auction from "./pages/Auction";
 import AddListing from "./pages/AddListing";
 import Profile from "./pages/Profile";
+import ListingDetail from "./pages/ListingDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => {
             <Route path="/auction" element={<Auction />} />
             <Route path="/add-listing" element={<AddListing />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/listing/:id" element={<ListingDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
