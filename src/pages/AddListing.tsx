@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -8,16 +8,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2, X, Image } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const MAX_LISTINGS = 5;
 
 const AddListing = () => {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [userListingCount, setUserListingCount] = useState(0);
   const [categories, setCategories] = useState<{ id: string; name: string; type: string }[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -33,12 +37,15 @@ const AddListing = () => {
         navigate("/auth");
         return;
       }
+      
+      setUserId(session.user.id);
 
       // Fetch user's listing count
       const { count } = await supabase
         .from("listings")
         .select("*", { count: "exact", head: true })
-        .eq("user_id", session.user.id);
+        .eq("user_id", session.user.id)
+        .neq("status", "sold");
       
       setUserListingCount(count || 0);
     };
@@ -56,6 +63,45 @@ const AddListing = () => {
     checkAuth();
     fetchCategories();
   }, [navigate]);
+
+  const handleImageUpload = async (files: FileList) => {
+    if (!userId) return;
+    if (imageUrls.length + files.length > 5) {
+      toast.error("Maximum 5 images allowed");
+      return;
+    }
+
+    setUploadingImages(true);
+    const newUrls: string[] = [];
+
+    for (let i = 0; i < files.length && imageUrls.length + newUrls.length < 5; i++) {
+      const file = files[i];
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${userId}/${Date.now()}-${i}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("listing-images")
+        .upload(fileName, file);
+
+      if (uploadError) {
+        toast.error(`Failed to upload ${file.name}`);
+        continue;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("listing-images")
+        .getPublicUrl(fileName);
+
+      newUrls.push(publicUrl);
+    }
+
+    setImageUrls([...imageUrls, ...newUrls]);
+    setUploadingImages(false);
+  };
+
+  const removeImage = (index: number) => {
+    setImageUrls(imageUrls.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,6 +132,8 @@ const AddListing = () => {
         category_id: formData.category_id || null,
         condition: formData.condition,
         listing_type: listingType,
+        images: imageUrls.length > 0 ? imageUrls : null,
+        status: "active",
       });
 
       if (error) throw error;
@@ -109,9 +157,7 @@ const AddListing = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-honey to-honey-light bg-clip-text text-Black">
-            Post an Ad
-          </h1>
+          <h1 className="text-4xl font-bold mb-2 text-black">Post an Ad</h1>
           <p className="text-sm text-muted-foreground mb-8">
             You have {MAX_LISTINGS - userListingCount} listing(s) remaining
           </p>
@@ -122,6 +168,50 @@ const AddListing = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Image Upload */}
+                <div className="space-y-2">
+                  <Label>Images (up to 5)</Label>
+                  <div className="flex flex-wrap gap-3">
+                    {imageUrls.map((url, index) => (
+                      <div key={index} className="relative w-24 h-24 rounded-lg overflow-hidden border">
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute top-1 right-1 bg-black/50 rounded-full p-1"
+                        >
+                          <X className="h-3 w-3 text-white" />
+                        </button>
+                      </div>
+                    ))}
+                    {imageUrls.length < 5 && (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadingImages}
+                        className="w-24 h-24 rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center gap-1 hover:border-honey transition-colors"
+                      >
+                        {uploadingImages ? (
+                          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                        ) : (
+                          <>
+                            <Image className="h-6 w-6 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">Add</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => e.target.files && handleImageUpload(e.target.files)}
+                    className="hidden"
+                  />
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="title">Title</Label>
                   <Input
