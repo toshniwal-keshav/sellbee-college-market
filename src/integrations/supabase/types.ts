@@ -126,6 +126,50 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          action_taken: boolean | null
+          action_type: string | null
+          created_at: string
+          id: string
+          listing_id: string | null
+          message: string
+          read: boolean | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          action_taken?: boolean | null
+          action_type?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string | null
+          message: string
+          read?: boolean | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          action_taken?: boolean | null
+          action_type?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string | null
+          message?: string
+          read?: boolean | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -173,7 +217,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      approve_auction_move: {
+        Args: { notification_id: string }
+        Returns: undefined
+      }
+      check_unsold_items_for_auction: { Args: never; Returns: undefined }
+      decline_auction_move: {
+        Args: { notification_id: string }
+        Returns: undefined
+      }
+      expire_old_auctions: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
