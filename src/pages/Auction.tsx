@@ -55,7 +55,7 @@ const Auction = () => {
   const fetchAuctions = async () => {
     setLoading(true);
 
-    // Fetch auction listings
+    // Fetch active auction listings (not expired)
     const { data: listingsData, error } = await supabase
       .from("listings")
       .select(`
@@ -63,6 +63,8 @@ const Auction = () => {
         categories (name)
       `)
       .eq("is_auction", true)
+      .eq("status", "active")
+      .gte("auction_end_date", new Date().toISOString())
       .order("auction_end_date", { ascending: true });
 
     if (error || !listingsData) {

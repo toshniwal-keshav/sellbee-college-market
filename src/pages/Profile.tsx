@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { User, Package, Edit, Briefcase, Loader2, Camera, Trash2, Check, X } from "lucide-react";
+import { User, Package, Edit, Briefcase, Loader2, Camera, Trash2, Check, X, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -31,6 +31,16 @@ interface Listing {
   images: string[] | null;
 }
 
+interface Notification {
+  id: string;
+  listing_id: string | null;
+  type: string;
+  message: string;
+  read: boolean;
+  action_taken: boolean;
+  created_at: string;
+}
+
 const Profile = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -41,6 +51,8 @@ const Profile = () => {
   const [isEditingSkills, setIsEditingSkills] = useState(false);
   const [editingImageListingId, setEditingImageListingId] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [processingNotification, setProcessingNotification] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     full_name: "",
@@ -110,6 +122,17 @@ const Profile = () => {
 
     if (listingsData) {
       setListings(listingsData);
+    }
+
+    // Fetch notifications
+    const { data: notificationsData } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("action_taken", false)
+      .order("created_at", { ascending: false });
+
+    if (notificationsData) {
+      setNotifications(notificationsData as Notification[]);
     }
 
     setLoading(false);
@@ -240,6 +263,37 @@ const Profile = () => {
     navigate("/");
   };
 
+  const handleApproveAuction = async (notificationId: string) => {
+    setProcessingNotification(notificationId);
+    try {
+      const { error } = await supabase.rpc("approve_auction_move", { notification_id: notificationId });
+      if (error) throw error;
+      
+      setNotifications(notifications.filter(n => n.id !== notificationId));
+      toast.success("Item moved to auction!");
+      checkAuthAndFetchData(); // Refresh listings
+    } catch (error: any) {
+      toast.error(error.message || "Failed to approve auction");
+    } finally {
+      setProcessingNotification(null);
+    }
+  };
+
+  const handleDeclineAuction = async (notificationId: string) => {
+    setProcessingNotification(notificationId);
+    try {
+      const { error } = await supabase.rpc("decline_auction_move", { notification_id: notificationId });
+      if (error) throw error;
+      
+      setNotifications(notifications.filter(n => n.id !== notificationId));
+      toast.success("Auction declined");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to decline");
+    } finally {
+      setProcessingNotification(null);
+    }
+  };
+
   const activeListings = listings.filter(l => l.status !== "sold");
   const soldListings = listings.filter(l => l.status === "sold");
 
@@ -263,6 +317,55 @@ const Profile = () => {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-honey to-honey-light bg-clip-text text-transparent">
             My Profile
           </h1>
+
+          {/* Notifications */}
+          {notifications.length > 0 && (
+            <Card className="border-honey/50 bg-honey/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5 text-honey" />
+                  Notifications ({notifications.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {notifications.map((notification) => (
+                  <div 
+                    key={notification.id}
+                    className="flex items-center justify-between p-4 bg-background rounded-lg border"
+                  >
+                    <p className="text-sm flex-1">{notification.message}</p>
+                    {notification.type === "auction_permission" && (
+                      <div className="flex gap-2 ml-4">
+                        <Button
+                          size="sm"
+                          onClick={() => handleApproveAuction(notification.id)}
+                          disabled={processingNotification === notification.id}
+                        >
+                          {processingNotification === notification.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>
+                              <Check className="h-4 w-4 mr-1" />
+                              Approve
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeclineAuction(notification.id)}
+                          disabled={processingNotification === notification.id}
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          Decline
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Profile Information */}
           <Card>
