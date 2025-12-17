@@ -55,10 +55,13 @@ const Navbar = ({ isAuthenticated = false, onLogout }: NavbarProps) => {
           ) : (
             <>
               <Button variant="ghost" asChild>
-                <Link to="/auth">Login</Link>
+                <Link to="/marketplace">Marketplace</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link to="/auction">🔨 Auction</Link>
               </Button>
               <Button variant="default" asChild>
-                <Link to="/auth">Get Started</Link>
+                <Link to="/auth">Login</Link>
               </Button>
             </>
           )}
