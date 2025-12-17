@@ -4,7 +4,7 @@
 
 **URL**: https://lovable.dev/projects/88e99277-1619-4eba-b825-6826d2b8ec16
 
-# 🐝 SelBee – College Marketplace
+# 🐝 SellBee – College Marketplace
 
 SelBee is a modern, college-focused online marketplace built using **React and Tailwind CSS**.  
 It allows students to **buy, sell, auction, and manage items** within their campus in a smooth and visually engaging way.
@@ -101,7 +101,7 @@ Backend services
 This file customizes Tailwind CSS to match SelBee’s college-friendly honey theme, smooth animations, and modern UI.
 
 ## 🧠 Application Flow
-1. User opens SelBee
+1. User opens SellBee
 2. Auth page handles login/signup
 3. Navbar updates based on authentication
 4. Users can:
