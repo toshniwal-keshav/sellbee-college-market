@@ -129,6 +129,16 @@ const Auction = () => {
     return () => clearInterval(timer);
   }, [auctions]);
 
+  const openBidDialog = (auction: AuctionListing) => {
+    if (!currentUserId) {
+      toast.error("Please login to place a bid");
+      navigate("/auth");
+      return;
+    }
+    setSelectedAuction(auction);
+    setBidAmount(String((auction.highest_bid || auction.price * 0.5) + 10));
+  };
+
   const handlePlaceBid = async () => {
     if (!selectedAuction || !bidAmount) return;
     
@@ -254,10 +264,7 @@ const Auction = () => {
                 <CardFooter className="p-4 pt-0">
                   <Button 
                     className="w-full" 
-                    onClick={() => {
-                      setSelectedAuction(auction);
-                      setBidAmount(String((auction.highest_bid || auction.price * 0.5) + 10));
-                    }}
+                    onClick={() => openBidDialog(auction)}
                     disabled={timeLeft[auction.id] === "Ended"}
                   >
                     {timeLeft[auction.id] === "Ended" ? "Auction Ended" : "Place Bid"}

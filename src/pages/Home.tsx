@@ -1,15 +1,53 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Users, TrendingUp, Shield } from "lucide-react";
+import { ShoppingBag, Users, TrendingUp, Shield, AlertCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import { useAuth } from "@/hooks/useAuth";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Home = () => {
+  const navigate = useNavigate();
+  const { user, profile, loading, signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/");
+  };
+
   return (
    <div className="min-h-screen bg-background font-fredoka">
 
 
-      <Navbar />
+      <Navbar isAuthenticated={!!user} onLogout={handleLogout} />
       
+      {/* Auth Status & Login Requirement Message */}
+      <section className="container mx-auto px-4 pt-6">
+        <div className="max-w-3xl mx-auto space-y-3">
+          {/* Login Status */}
+          <div className="text-center">
+            {loading ? (
+              <p className="text-muted-foreground">Loading...</p>
+            ) : user ? (
+              <p className="text-foreground font-medium">
+                Logged in as: <span className="text-honey">{profile?.full_name || profile?.username || user.email}</span>
+              </p>
+            ) : (
+              <p className="text-muted-foreground">You are not logged in</p>
+            )}
+          </div>
+          
+          {/* Login Requirement Message for non-logged-in users */}
+          {!user && !loading && (
+            <Alert className="border-honey/50 bg-honey/5">
+              <AlertCircle className="h-4 w-4 text-honey" />
+              <AlertDescription className="text-foreground">
+                You must be logged in to post an ad or place a bid.
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
+      </section>
+
       {/* Hero Section */}
       <section className="relative container mx-auto px-4 py-16 text-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-honey/5 via-pastel-lavender/10 to-pastel-pink/5 -z-10"></div>
@@ -33,15 +71,6 @@ const Home = () => {
          <div className="flex gap-3 justify-center">
   <Button asChild size="lg">
     <Link to="/marketplace">Browse Items</Link>
-  </Button>
-
-  <Button 
-    variant="outline" 
-    asChild 
-    size="lg" 
-    className="border-black text-black hover:bg-black/5"
-  >
-    <Link to="/auth">Get Started</Link>
   </Button>
 </div>
 
