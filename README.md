@@ -4,6 +4,20 @@
 
 **URL**: https://lovable.dev/projects/88e99277-1619-4eba-b825-6826d2b8ec16
 
+# 🐝 SelBee – College Marketplace
+
+SelBee is a modern, college-focused online marketplace built using **React and Tailwind CSS**.  
+It allows students to **buy, sell, auction, and manage items** within their campus in a smooth and visually engaging way.
+
+## 📌 Features
+
+- 🛒 Buy and sell college items  
+- 📝 Easy product listing creation  
+- 🔍 Browse and search marketplace items  
+- 🔨 Auction system for bidding  
+- 👤 Personal user profiles  
+- 🎨 Friendly UI with animations and hover effects  
+
 ## How can I edit this code?
 
 There are several ways of editing your application.
@@ -50,16 +64,22 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## What technologies are used for this project?
+## 🛠️ Technologies Used
+### Frontend
+- **React (Vite)** – Component-based UI
+- **TypeScript** – Type-safe development
+- **Tailwind CSS** – Utility-first styling
+- **ShadCN UI** – Modern pre-built components
+- **Lucide Icons** – Clean and modern icons
 
-This project is built with:
+- ### Fonts
+- **Google Font – Fredoka**
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
+```html
+<link
+  href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap"
+  rel="stylesheet"/>
+- 
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/88e99277-1619-4eba-b825-6826d2b8ec16) and click on Share -> Publish.
