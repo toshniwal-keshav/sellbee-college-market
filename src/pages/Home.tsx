@@ -275,11 +275,34 @@ const Home = () => {
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-20">
         <div className="relative bg-gradient-to-br from-honey/10 via-honey/5 to-pastel-lavender/10 rounded-3xl p-12 text-center border border-honey/20 overflow-hidden">
-          {/* Decorative elements */}
-          <div className="absolute top-0 left-0 w-32 h-32 bg-honey/10 rounded-full blur-2xl" />
-          <div className="absolute bottom-0 right-0 w-40 h-40 bg-pastel-pink/20 rounded-full blur-2xl" />
-          <div className="absolute top-1/2 left-1/4 text-6xl opacity-10 animate-float">🐝</div>
-          <div className="absolute top-1/3 right-1/4 text-4xl opacity-10 animate-float" style={{ animationDelay: "1s" }}>🍯</div>
+          {/* Decorative blurred circles */}
+          <div className="absolute top-0 left-0 w-40 h-40 bg-honey/15 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-0 w-48 h-48 bg-pastel-pink/25 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-0 w-32 h-32 bg-pastel-lavender/30 rounded-full blur-2xl" />
+          <div className="absolute bottom-1/3 right-10 w-36 h-36 bg-pastel-mint/20 rounded-full blur-2xl" />
+          <div className="absolute top-10 right-1/3 w-24 h-24 bg-honey-light/20 rounded-full blur-xl" />
+          
+          {/* Floating emojis */}
+          <div className="absolute top-1/2 left-[10%] text-5xl opacity-15 animate-float">🐝</div>
+          <div className="absolute top-[20%] right-[15%] text-4xl opacity-10 animate-float" style={{ animationDelay: "1s" }}>🍯</div>
+          <div className="absolute bottom-[25%] left-[20%] text-3xl opacity-10 animate-float" style={{ animationDelay: "0.5s" }}>📦</div>
+          <div className="absolute top-[30%] left-[5%] text-4xl opacity-10 animate-float" style={{ animationDelay: "1.5s" }}>📚</div>
+          <div className="absolute bottom-[20%] right-[8%] text-5xl opacity-15 animate-float" style={{ animationDelay: "2s" }}>🐝</div>
+          <div className="absolute top-[15%] left-[30%] text-3xl opacity-10 animate-float" style={{ animationDelay: "0.8s" }}>💡</div>
+          <div className="absolute bottom-[35%] right-[25%] text-3xl opacity-10 animate-float" style={{ animationDelay: "1.2s" }}>🎓</div>
+          
+          {/* Hexagon patterns */}
+          <div className="absolute top-8 left-[15%] w-16 h-16 border-2 border-honey/10 rotate-12" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }} />
+          <div className="absolute bottom-12 right-[20%] w-20 h-20 border-2 border-honey/10 -rotate-6" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }} />
+          <div className="absolute top-1/3 right-[5%] w-12 h-12 border-2 border-pastel-lavender/20 rotate-45" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }} />
+          <div className="absolute bottom-1/4 left-[8%] w-14 h-14 border-2 border-pastel-pink/15 -rotate-12" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }} />
+          
+          {/* Sparkle dots */}
+          <div className="absolute top-[25%] left-[25%] w-2 h-2 bg-honey/40 rounded-full animate-pulse" />
+          <div className="absolute top-[40%] right-[30%] w-1.5 h-1.5 bg-honey/30 rounded-full animate-pulse" style={{ animationDelay: "0.5s" }} />
+          <div className="absolute bottom-[30%] left-[35%] w-2 h-2 bg-honey-light/40 rounded-full animate-pulse" style={{ animationDelay: "1s" }} />
+          <div className="absolute top-[60%] right-[15%] w-1.5 h-1.5 bg-pastel-pink/40 rounded-full animate-pulse" style={{ animationDelay: "0.3s" }} />
+          <div className="absolute bottom-[45%] right-[40%] w-2 h-2 bg-honey/35 rounded-full animate-pulse" style={{ animationDelay: "0.7s" }} />
           
           <div className="relative z-10">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
