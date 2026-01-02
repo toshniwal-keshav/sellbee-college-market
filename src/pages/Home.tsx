@@ -1,10 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Users, TrendingUp, Shield, AlertCircle, Sparkles, BookOpen, Palette, Code, ArrowRight, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { ShoppingBag, Users, TrendingUp, Shield, AlertCircle, Sparkles, BookOpen, Palette, Code, ArrowRight, Star } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/hooks/useAuth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 
 interface Testimonial {
   name: string;
@@ -14,34 +14,12 @@ interface Testimonial {
 }
 
 const TestimonialsCarousel = ({ testimonials }: { testimonials: Testimonial[] }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const [direction, setDirection] = useState<'left' | 'right'>('right');
-
-  const nextSlide = useCallback(() => {
-    setDirection('right');
-    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
-  }, [testimonials.length]);
-
-  const prevSlide = useCallback(() => {
-    setDirection('left');
-    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-  }, [testimonials.length]);
-
-  const goToSlide = (index: number) => {
-    setDirection(index > currentIndex ? 'right' : 'left');
-    setCurrentIndex(index);
-  };
-
-  useEffect(() => {
-    if (!isAutoPlaying) return;
-    const interval = setInterval(nextSlide, 4000);
-    return () => clearInterval(interval);
-  }, [isAutoPlaying, nextSlide]);
+  const [isHovered, setIsHovered] = useState(false);
+  const [activeCard, setActiveCard] = useState<number | null>(null);
 
   return (
-    <section className="container mx-auto px-4 py-20">
-      <div className="max-w-4xl mx-auto">
+    <section className="container mx-auto px-4 py-20 overflow-hidden">
+      <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4">
             What Students <span className="text-honey">Say</span>
@@ -51,115 +29,94 @@ const TestimonialsCarousel = ({ testimonials }: { testimonials: Testimonial[] })
           </p>
         </div>
 
+        {/* Infinite scroll container */}
         <div 
           className="relative"
-          onMouseEnter={() => setIsAutoPlaying(false)}
-          onMouseLeave={() => setIsAutoPlaying(true)}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => { setIsHovered(false); setActiveCard(null); }}
         >
-          {/* Carousel container */}
-          <div className="overflow-hidden rounded-3xl">
-            <div className="relative h-[320px] md:h-[280px]">
-              {testimonials.map((testimonial, index) => {
-                const isActive = index === currentIndex;
-                const isPrev = index === (currentIndex - 1 + testimonials.length) % testimonials.length;
-                const isNext = index === (currentIndex + 1) % testimonials.length;
-                
-                return (
-                  <div
-                    key={testimonial.name}
-                    className={`absolute inset-0 transition-all duration-700 ease-out ${
-                      isActive 
-                        ? 'opacity-100 translate-x-0 scale-100 z-20' 
-                        : isPrev 
-                          ? 'opacity-0 -translate-x-full scale-95 z-10' 
-                          : isNext 
-                            ? 'opacity-0 translate-x-full scale-95 z-10'
-                            : 'opacity-0 scale-90 z-0'
-                    }`}
-                  >
-                    <div className="h-full bg-gradient-to-br from-card via-card to-honey/5 border border-border rounded-3xl p-8 md:p-10 shadow-xl shadow-honey/5">
-                      {/* Quote icon */}
-                      <div className="absolute top-6 right-8 text-8xl text-honey/10 font-serif leading-none">
-                        "
+          {/* Gradient fade edges */}
+          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+          
+          {/* Scrolling track */}
+          <div className="overflow-hidden">
+            <div 
+              className={`flex gap-6 ${isHovered ? '[animation-play-state:paused]' : ''}`}
+              style={{
+                animation: 'scroll-testimonials 20s linear infinite',
+                width: 'max-content',
+              }}
+            >
+              {/* Duplicate testimonials for seamless loop */}
+              {[...testimonials, ...testimonials, ...testimonials].map((testimonial, index) => (
+                <div
+                  key={`${testimonial.name}-${index}`}
+                  className={`group relative flex-shrink-0 w-[350px] bg-gradient-to-br from-card via-card to-honey/5 border border-border rounded-2xl p-6 transition-all duration-500 cursor-pointer ${
+                    activeCard === index 
+                      ? 'border-honey shadow-2xl shadow-honey/20 scale-105 z-20' 
+                      : 'hover:border-honey/50 hover:shadow-xl hover:shadow-honey/10'
+                  }`}
+                  onMouseEnter={() => setActiveCard(index)}
+                  onMouseLeave={() => setActiveCard(null)}
+                >
+                  {/* Quote icon */}
+                  <div className="absolute top-4 right-4 text-6xl text-honey/10 font-serif leading-none group-hover:text-honey/20 transition-colors">
+                    "
+                  </div>
+                  
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className={`h-14 w-14 rounded-full bg-gradient-to-br from-honey/30 to-honey/10 flex items-center justify-center text-2xl shadow-lg shadow-honey/20 transition-transform duration-300 ${
+                        activeCard === index ? 'scale-110 animate-bounce-subtle' : ''
+                      }`}>
+                        {testimonial.avatar}
                       </div>
-                      
-                      <div className="flex flex-col h-full justify-between relative z-10">
-                        <div>
-                          <div className="flex items-center gap-4 mb-6">
-                            <div className="h-16 w-16 rounded-full bg-gradient-to-br from-honey/30 to-honey/10 flex items-center justify-center text-3xl shadow-lg shadow-honey/20 animate-bounce-subtle">
-                              {testimonial.avatar}
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-xl text-foreground">{testimonial.name}</h4>
-                              <p className="text-muted-foreground">{testimonial.role}</p>
-                            </div>
-                          </div>
-                          
-                          <p className="text-lg md:text-xl text-foreground/90 leading-relaxed italic">
-                            "{testimonial.quote}"
-                          </p>
-                        </div>
-                        
-                        <div className="flex gap-1 mt-6">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-5 h-5 fill-honey text-honey drop-shadow-sm" />
-                          ))}
-                        </div>
+                      <div>
+                        <h4 className="font-bold text-base text-foreground group-hover:text-honey transition-colors">{testimonial.name}</h4>
+                        <p className="text-sm text-muted-foreground">{testimonial.role}</p>
                       </div>
                     </div>
+                    
+                    <p className="text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors line-clamp-4">
+                      "{testimonial.quote}"
+                    </p>
+                    
+                    <div className="flex gap-1 mt-4">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-honey text-honey" />
+                      ))}
+                    </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Navigation arrows */}
-          <button
-            onClick={prevSlide}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-6 w-12 h-12 rounded-full bg-card border border-border shadow-lg flex items-center justify-center text-foreground hover:bg-honey hover:text-white hover:border-honey transition-all duration-300 hover:scale-110 z-30"
-            aria-label="Previous testimonial"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          <button
-            onClick={nextSlide}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-6 w-12 h-12 rounded-full bg-card border border-border shadow-lg flex items-center justify-center text-foreground hover:bg-honey hover:text-white hover:border-honey transition-all duration-300 hover:scale-110 z-30"
-            aria-label="Next testimonial"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-
-          {/* Dot indicators */}
-          <div className="flex justify-center gap-3 mt-8">
+          {/* Decorative dots */}
+          <div className="flex justify-center gap-2 mt-8">
             {testimonials.map((_, index) => (
-              <button
+              <div
                 key={index}
-                onClick={() => goToSlide(index)}
-                className={`relative h-3 rounded-full transition-all duration-500 ${
-                  index === currentIndex 
-                    ? 'w-10 bg-honey' 
-                    : 'w-3 bg-border hover:bg-honey/50'
-                }`}
-                aria-label={`Go to testimonial ${index + 1}`}
-              >
-                {index === currentIndex && (
-                  <span className="absolute inset-0 rounded-full bg-honey animate-pulse opacity-50" />
-                )}
-              </button>
+                className="w-2 h-2 rounded-full bg-honey/30 animate-pulse"
+                style={{ animationDelay: `${index * 0.3}s` }}
+              />
             ))}
-          </div>
-
-          {/* Progress bar */}
-          <div className="mt-6 h-1 bg-border rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-honey to-honey-light rounded-full transition-all duration-300"
-              style={{ 
-                width: `${((currentIndex + 1) / testimonials.length) * 100}%`,
-              }}
-            />
           </div>
         </div>
       </div>
+
+      {/* Add keyframes for scrolling animation */}
+      <style>{`
+        @keyframes scroll-testimonials {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(calc(-350px * 3 - 24px * 3));
+          }
+        }
+      `}</style>
     </section>
   );
 };
